@@ -29,7 +29,7 @@
                      alt=""/>
                 <p>{{activeChat.name}}</p>
             </div>
-            <div class="messages">
+            <div ref="chatContainer" class="messages">
                 <ul>
 
                     <li v-if="activeChat.messages.length==0" class="no-chats text-center">
@@ -60,6 +60,7 @@
 </template>
 
 <script>
+    import {v1 as uuid} from 'uuid';
     export default {
         props: ['user', 'browserIdentity'],
         data() {
@@ -99,33 +100,59 @@
         methods: {
             sendChat(e) {
                 e.preventDefault();
-                if (this.sending || !this.message.trim()) {
-                    return false
-                }
-                this.sending = true;
+
+                const message = this.message
+
+                if (message.trim().length===0) return false
+
+                const user = this.user
+                const browserIdentity = this.browserIdentity
+                const activeChatId = this.activeChatId
+
+
+                const client_chat_message = {
+                    browser_identity: browserIdentity,
+                    message: {
+                        id: uuid(),
+                        message: message,
+                        author: {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            avatar: user.avatar
+                        }
+                    },
+                    chat_id: activeChatId
+                };
+                this.appendChatMessage(client_chat_message)
+
+                this.message = '';
+
                 axios.post('/send-chat', {
-                    message: this.message,
-                    chat_id: this.activeChatId,
-                    author_id: this.user.id,
-                    browser_identity: this.browserIdentity,
+                    message: message,
+                    chat_id: activeChatId,
+                    author_id: user.id,
+                    browser_identity: browserIdentity,
                 })
                     .then((response) => {
                         if (response.status === 200) {
                             const data = response.data;
-                            this.appendChatMessage(data)
+
                         }
-                        this.message = '';
-                        this.sending = false
+
                     })
                     .catch((error) => {
-                        this.message = '';
-                        this.sending = false
                     });
             },
             appendChatMessage(data) {
                 let chat = _.find(this.chats, {'id': data.chat_id});
                 chat.last_message = data.message.message;
                 chat.messages.push(data.message);
+
+                setTimeout(()=>{
+                    const chatContainer = this.$refs.chatContainer;
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                },300)
 
             },
             selectChat(chat) {
