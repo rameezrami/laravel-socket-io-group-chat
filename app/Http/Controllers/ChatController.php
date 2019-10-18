@@ -53,7 +53,7 @@ class ChatController extends Controller
             'chat_id' => $chatId,
         ];
 
-        $userIds = User::limit(50)->get()->pluck('id');
+        $userIds = User::limit(200)->get()->pluck('id');
 
         broadcast(new NewChat([
             'workspace_id' => $workspaceId,
