@@ -1841,10 +1841,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['user', 'browserIdentity'],
+  props: ['user'],
   data: function data() {
     return {
       message: '',
+      browserIdentity: Object(uuid__WEBPACK_IMPORTED_MODULE_0__["v1"])(),
       sending: false,
       workspaceId: 1,
       activeChatId: '',
@@ -1855,12 +1856,17 @@ __webpack_require__.r(__webpack_exports__);
         last_message: ''
       }, {
         id: 'chat-1',
-        name: 'My First Chat Group',
+        name: 'Chat Group 1',
         messages: [],
         last_message: ''
       }, {
         id: 'chat-2',
-        name: 'My Second Chat Group',
+        name: 'Chat Group 2',
+        messages: [],
+        last_message: ''
+      }, {
+        id: 'single-channel',
+        name: 'Single Channel Chat',
         messages: [],
         last_message: ''
       }]
@@ -1958,9 +1964,15 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     listenUserWorkspacePrivateChannel: function listenUserWorkspacePrivateChannel() {
+      var _this4 = this;
+
       //TODO:this need to change to private channel at the time of implementation
-      Echo.channel("workspace-".concat(this.workspaceId)).listen('workspace-announcement', function (data) {
-        console.log('workspace-announcement', data);
+      Echo.channel("workspace-".concat(this.workspaceId)).listen('.new.chat', function (data) {
+        console.log('chat signal on workspace channel:', data);
+
+        if (_this4.browserIdentity !== data.browser_identity) {
+          _this4.appendChatMessage(data);
+        }
       });
     }
   }

@@ -46,10 +46,17 @@ class NewChat implements ShouldBroadcast
     {
         $workspaceId = $this->params['workspace_id'];
         $userIds = $this->params['user_ids'];
+        $chat_id = $this->params['chat_id'];
+
         $channels = [];
-        foreach ($userIds as $userId):
-            $channels[]= new Channel("workspace-{$workspaceId}-user-{$userId}");
-        endforeach;
+
+        if($chat_id==='single-channel'):
+            $channels = ['workspace-1'];
+        else:
+            foreach ($userIds as $userId):
+                $channels[]= new Channel("workspace-{$workspaceId}-user-{$userId}");
+            endforeach;
+        endif;
 
         return $channels;
     }

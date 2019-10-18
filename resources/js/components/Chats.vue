@@ -62,10 +62,11 @@
 <script>
     import {v1 as uuid} from 'uuid';
     export default {
-        props: ['user', 'browserIdentity'],
+        props: ['user'],
         data() {
             return {
                 message: '',
+                browserIdentity:uuid(),
                 sending: false,
                 workspaceId: 1,
                 activeChatId: '',
@@ -76,8 +77,9 @@
                         messages: [],
                         last_message: ''
                     },
-                    {id: 'chat-1', name: 'My First Chat Group', messages: [], last_message: ''},
-                    {id: 'chat-2', name: 'My Second Chat Group', messages: [], last_message: ''},
+                    {id: 'chat-1', name: 'Chat Group 1', messages: [], last_message: ''},
+                    {id: 'chat-2', name: 'Chat Group 2', messages: [], last_message: ''},
+                    {id: 'single-channel', name: 'Single Channel Chat', messages: [], last_message: ''},
                 ]
             }
         },
@@ -178,9 +180,11 @@
             listenUserWorkspacePrivateChannel() {
                 //TODO:this need to change to private channel at the time of implementation
                 Echo.channel(`workspace-${this.workspaceId}`)
-                    .listen('workspace-announcement', (data) => {
-
-                        console.log('workspace-announcement', data)
+                    .listen('.new.chat', (data) => {
+                        console.log('chat signal on workspace channel:', data);
+                        if (this.browserIdentity !== data.browser_identity) {
+                            this.appendChatMessage(data)
+                        }
                     })
             },
         }
